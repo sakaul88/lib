@@ -1,0 +1,103 @@
+# Setup Travis
+#   1. Login at travis.ibm.com
+#   2. Go to accounts and click on "Sync account"
+#   3. Enable the repo you'd like to setup, and click on the settings icon
+#   4. Enable "Build pushes" & "Build pull requests"
+#
+# Documentation:
+#   Make sure to read / review:
+#     1. Docker best practices: https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/
+#     2. Helm best practices: https://github.com/kubernetes/helm/tree/master/docs/chart_best_practices
+#     3. Reference charts:  https://github.com/kubernetes/charts
+#
+#   Implementation:  The high level goal is to build, test, and deploy purely via:
+#     1.  GitHub
+#     2.  Travis CI
+#     3.  Artifactory
+#
+#   While allowing the ability to:
+#     1.  Perform the entire end-to-end flow within your private repo simply by setting Travis CI environment variables
+#     2.  After initial development, removal of the Travis CI environment variables to:
+#        a.  Build the code, test the code, and build the Docker image during a PR (don't publish to Artifactory)
+#        b.  Perform the entire end-to-end flow during a push (PR merge), including publushing to Artifactory
+#
+#   This script combined with initial setup accomplishes this.  The code is setup to skip various flows if Travis environment variables are not present, and a high level of each:
+#     a.  INTRANET_USERNAME:  The read / write username for logging into Artifactory (Docker and PiPY)
+#     b.  GITHUB_PAT:  The GitHub personal access token for the INTRANET_USERNAME user.  This is used to clone common Travis CI scripts from a central (public) GitHub repo
+#     c.  ARTIFACTORY_USERNAME: The username for downloading artefacts from artefactory. If not provided, INTRANET_USERNAME is used.
+#     d.  ARTIFACTORY_API_KEY:  The API key for ARTIFACTORY_USERNAME to be used where supported
+#     e.  GOVERNOR_API_USERNAME:  The Username to use while uploading and upgrading Helm charts using The Governor
+#     f.  GOVERNOR_API_KEY:  The API Key to use while uploading and upgrading Helm charts using The Governor
+#
+#   Flow:
+#     i.   If INTRANET_USERNAME, INTRANET_PASSWORD, and GITHUB_PAT is not specified the code will simply build without publishing artifacts to Artifactory
+#     ii.  If CHART_API_KEY is not specified, the Chart upload and upgrade will be skipped
+#
+#   Global variables:
+#     A.  APPLICATION_NAME:  Used for the docker image name
+#     B.  CHART:  Used for the Helm chart name, which is typically the same as $APPLICATION_NAME.  See:  https://github.com/kubernetes/helm/blob/master/docs/charts.md
+#     C.  RELEASE:  Used for the Helm chart release, and isn't necessarily the same as the application name.  Think multiple "releases" of the same docker image, each for a different purpose / solution
+#
+# Unexpected nuances:
+#   1. before_deploy is executed for each and every deploy, so use it sparingly.  I.E.  If there are multiple deploy in the list, before_deploy is called for each of them
+#   2. Executing a script during deploy with packages installed via pip causes issues, as Python can't find them by default.  PYTHONPATH is needed to point them to the pip site-packages location
+#   3. There is no obvious means to instruct deploy to package a Python module from a specific directory.  As a result, before_deploy is needed to setup
+
+# Indicates type of virtual environment. [Ubuntu container, Ubuntu VM, OSX VM]
+# sudo: false => Ubuntu container
+# sudo: required => Ubuntu VM 
+# os: osx => OSX VM
+sudo: false
+
+language: python
+python:
+- "2.7"
+
+env:
+  global:
+  - PIP_MODULE_NAME=p2paas-baseutils
+  - PIP_HOSTNAME=na.artifactory.swg-devops.com
+  - PIP_REPO_NAME=wce-p2paas-pypi-local
+
+before_install:
+- export version=1.$(date "+%Y%m%d").$TRAVIS_BUILD_NUMBER
+- echo "Build version=$version"
+- cd $TRAVIS_BUILD_DIR
+- sed -ie "s/version='1.0.0'/version='$version'/" setup.py
+- cat setup.py
+- export ARTIFACTORY_USERNAME=$(if [[ -z "$ARTIFACTORY_USERNAME" ]]; then echo $INTRANET_USERNAME; else echo $ARTIFACTORY_USERNAME; fi)
+
+install:
+- pip install dateutils
+- pip install flake8
+- pip install logmatic-python
+- pip install PyYAML
+- pip install requests
+- pip install simplejson
+- pip install unittest2
+
+before_script:
+- flake8 . --count --max-complexity=10 --max-line-length=180 --statistics
+
+script:
+- python -m unittest discover -s $TRAVIS_BUILD_DIR/baseutils/tests
+
+before_deploy:
+- cd $TRAVIS_BUILD_DIR
+
+deploy:
+- provider: pypi
+  user: $INTRANET_USERNAME
+  password:
+    secure: $ARTIFACTORY_RW_APIKEY
+  server: https://$PIP_HOSTNAME/artifactory/api/pypi/$PIP_REPO_NAME
+  skip_upload_docs: true
+  skip_cleanup: true
+  distributions: "sdist"
+  on:
+    condition: '$TRAVIS_EVENT_TYPE = push && -n "$INTRANET_USERNAME" && -n "$ARTIFACTORY_RW_APIKEY" && $TRAVIS_TEST_RESULT == 0'
+
+after_deploy:
+- echo "Searching for python package in repository to validate deploy..."
+- curl -u $ARTIFACTORY_USERNAME:$ARTIFACTORY_API_KEY https://$PIP_HOSTNAME/artifactory/list/$PIP_REPO_NAME/$PIP_MODULE_NAME/$version/ | grep ".tar.gz" || DEPLOY_FAILURE=true
+- if [[ $DEPLOY_FAILURE == 'true' ]]; then echo "Deploy phase failed.  Failed to find https://$PIP_HOSTNAME/artifactory/list/$PIP_REPO_NAME/$PIP_MODULE_NAME/$version on Artifactory server"; travis_terminate 1; fi
