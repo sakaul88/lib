@@ -1,11 +1,11 @@
 import cStringIO
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEText import MIMEText
 import logging
 import logmatic
 import signal
 import smtplib
 import subprocess
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEText import MIMEText
 
 logger = logging.getLogger(__name__)
 

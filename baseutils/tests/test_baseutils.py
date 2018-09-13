@@ -1,9 +1,9 @@
 import logging
 import logmatic
-from mock import Mock
-from mock import patch
 import os
 import unittest
+from mock import Mock
+from mock import patch
 
 import baseutils
 
