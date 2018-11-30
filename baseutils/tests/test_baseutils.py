@@ -11,9 +11,14 @@ import baseutils
 class TestUtils(unittest.TestCase):
     def test_logger(self):
         logger = logging.getLogger()
-        baseutils.configure_logger(logger, file_path='/tmp/logfile')
+        baseutils.configure_logger(logger, file_path='/tmp/logfile', level=logging.INFO)
         self.assertTrue(isinstance(logger.handlers[0], logging.handlers.RotatingFileHandler))
+        self.assertTrue(isinstance(logger.handlers[0].formatter, logging.Formatter))
+        self.assertEqual(logging.INFO, logger.level)
+        logger.handlers = []
+        baseutils.configure_logger(logger, json_formatter=True, level=logging.ERROR)
         self.assertTrue(isinstance(logger.handlers[0].formatter, logmatic.JsonFormatter))
+        self.assertEqual(logging.ERROR, logger.level)
         logger.handlers = []
         formatter = logging.Formatter('[%(asctime)-15s] [unittests] %(levelname)s %(message)s')
         baseutils.configure_logger(logger, stream=True, formatter=formatter)
