@@ -25,7 +25,7 @@ def configure_logger(custom_logger, file_path=None, stream=False, formatter=None
         _add_logger_handler(custom_logger, handler, formatter)
     if stream:
         handler = logging.StreamHandler()
-        _add_logger_handler(custom_logger, handler, formatter)
+        _add_logger_handler(custom_logger, handler, formatter, json_formatter=json_formatter)
     custom_logger.setLevel(level)
 
 
