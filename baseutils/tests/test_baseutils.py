@@ -16,7 +16,7 @@ class TestUtils(unittest.TestCase):
         self.assertTrue(isinstance(logger.handlers[0].formatter, logging.Formatter))
         self.assertEqual(logging.INFO, logger.level)
         logger.handlers = []
-        baseutils.configure_logger(logger, json_formatter=True, level=logging.ERROR)
+        baseutils.configure_logger(logger, stream=True, json_formatter=True, level=logging.ERROR)
         self.assertTrue(isinstance(logger.handlers[0].formatter, logmatic.JsonFormatter))
         self.assertEqual(logging.ERROR, logger.level)
         logger.handlers = []
