@@ -10,32 +10,40 @@ from email.MIMEText import MIMEText
 logger = logging.getLogger(__name__)
 
 
-def configure_logger(custom_logger, file_path=None, stream=False, formatter=None, level=logging.INFO):
+def configure_logger(custom_logger, file_path=None, stream=False, formatter=None, json_formatter=False, level=logging.INFO):
     """
     Configure a logger in a standard way for python applications.
     Args:
+        custom_logger: The logger to be configured
         file_path: The path to a log file to use. If not provided, file logging will not be enabled
         stream: Set True if logs should be streamed to standard out. (Default: False)
-        formatter: A custom formatter to use. If not provided, a logmatic formatter will be created
+        formatter: A custom formatter to use. If not provided, standard formatter will be created. See arg json_formatter for details (Optional)
+        json_formatter: If a formatter is not provided, this identifies if the formatter that will be created should be a json formatter (logmatics) or a standard formatter
     """
     if file_path:
         handler = logging.handlers.RotatingFileHandler(file_path, backupCount=10, maxBytes=10240000)
         _add_logger_handler(custom_logger, handler, formatter)
     if stream:
         handler = logging.StreamHandler()
-        _add_logger_handler(custom_logger, handler, formatter)
+        _add_logger_handler(custom_logger, handler, formatter, json_formatter=json_formatter)
     custom_logger.setLevel(level)
 
 
-def _add_logger_handler(custom_logger, handler, formatter=None):
+def _add_logger_handler(custom_logger, handler, formatter=None, json_formatter=False):
     """
     Add a handler to a logger. If a formatter is not provided, a default logmatic one will be created.
     Args:
         custom_logger: The logger to add the handler to
         handler: The handler to add
-        formatter: The formatter for formatting the log. If not provided, a logmatic formatter will be created
+        formatter: The formatter for formatting the log. See arg json_formatter for details (Optional)
+        json_formatter: If a formatter is not provided, this identifies if the formatter that will be created should be a json formatter (logmatics) or a standard formatter
     """
-    handler.setFormatter(formatter if formatter else logmatic.JsonFormatter())
+    if not formatter:
+        if json_formatter:
+            formatter = logmatic.JsonFormatter()
+        else:
+            formatter = logging.Formatter('[%(asctime)-15s] [%(module)s] [%(funcName)s] %(levelname)s %(message)s')
+    handler.setFormatter(formatter)
     custom_logger.addHandler(handler)
 
 
