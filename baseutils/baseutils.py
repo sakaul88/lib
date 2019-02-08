@@ -1,4 +1,3 @@
-import cStringIO
 import logging
 import logmatic
 import signal
@@ -122,65 +121,6 @@ def shell_escape(value):
         The value to escape for safe shell execution
     """
     return "'" + value.replace("'", "'\"'\"'") + "'"
-
-
-def create_ssh_client(ip, username, sshkey):
-    """
-    Creates and returns an SSH paramiko client for the passed IP.
-    Args:
-        ip: The IP of the system to create an ssh connection to
-        username: The username to log on to the remote system with
-        sshkey: The ssh key to authentiate to the remote system with
-    """
-    import paramiko
-    ssh_client = paramiko.SSHClient()
-    key_file = cStringIO.StringIO(sshkey)
-    private_key = paramiko.RSAKey.from_private_key(key_file)
-    key_file.close()
-    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh_client.connect(ip, username=username, pkey=private_key)
-    return ssh_client
-
-
-def parallel_ssh(systems, cmd):
-    """
-    Executes a command on one or more systems in parallel.
-    Args:
-        systems: A list of dictionaries of the form: [{'ip': '127.0.0.1', 'username': 'centos', 'sshKey': 'key value'}, ...]
-        cmd: The command to execute on the remote systems
-    """
-    results = []
-    clients = []
-    for system in systems:
-        try:
-            ssh_client = create_ssh_client(system['ip'], system['username'], system['sshKey'])
-            (stdin, stdout, stderr) = ssh_client.exec_command(cmd)
-            clients.append({
-                'client': ssh_client,
-                'stdin': stdin,
-                'stdout': stdout,
-                'stderr': stderr
-            })
-        except:  # noqa: E722
-            logger.error('Failed to create ssh connection to ip %s with username %s.' % (system['ip'], system['username']), exc_info=1)
-            clients.append(None)
-    for client_properties in clients:
-        if client_properties:
-            try:
-                results.append({
-                    'output': ''.join(client_properties['stdout'].readlines()),
-                    'rc': client_properties['stdout'].channel.recv_exit_status()
-                    })
-                client_properties['client'].close()
-            except:  # noqa: E722
-                logger.error('Failed to read content from ssh connection', exc_info=1)
-                client_properties = None
-        if not client_properties:
-            results.append({
-                'output': 'Exception was received while attempting to create an ssh connection to the server',
-                'rc': -1
-            })
-    return results
 
 
 class timeout:

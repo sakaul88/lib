@@ -2,7 +2,6 @@ import logging
 import logmatic
 import os
 import unittest
-from mock import Mock
 from mock import patch
 
 import baseutils
@@ -51,15 +50,6 @@ class TestUtils(unittest.TestCase):
     def test_timeout(self):
         timeout = baseutils.timeout()
         self.assertRaises(Exception, timeout.handle_timeout)
-
-    @patch('baseutils.baseutils.create_ssh_client')
-    def test_parallel_ssh(self, mock_create_ssh_client):
-        mock_client = mock_create_ssh_client.return_value
-        std_out = Mock()
-        std_out.readlines.return_value = ['my', 'content']
-        mock_client.exec_command.return_value = ('in', std_out, 'err')
-        result = baseutils.parallel_ssh([{'ip': '127.0.0.1', 'username': 'centos', 'sshKey': 'abc'}], 'cmd')
-        self.assertEqual(result[0]['output'], 'mycontent')
 
 
 if __name__ == '__main__':
