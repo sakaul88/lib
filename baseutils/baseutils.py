@@ -1,4 +1,3 @@
-import cStringIO
 import logging
 import logmatic
 import signal
