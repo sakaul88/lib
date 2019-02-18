@@ -3,6 +3,7 @@ import logmatic
 import signal
 import smtplib
 import subprocess
+import time
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEText import MIMEText
 
@@ -84,7 +85,40 @@ def exe_cmd(cmd, working_dir=None, obfuscate=None, env=None, log_level=logging.I
     return (rc, output)
 
 
-def send_mail(mail_from, mail_to, subject, body, cc=None, bcc=None, smtpServer='localhost'):
+def retry(func, *args, **kwargs):
+    """
+    Helper method for retrying a function that fails by throwing an exception.
+    If all retries fail, the exception that was raised by the failing function is re-raised.
+    Args:
+        func: The function to retry
+        *args: Any arguments that are passed to the function
+        **kwargs: Any keyword arguments that are passed to the function
+        interval: The time between retries. This parameter will be removed from kwargs before forwarding to the function (Optional, default: 10 seconds)
+        retry: The number of times to retry. This parameter will be removed from kwargs before forwarding to the function (Optional, default: 10)
+    Returns: The return value of the passed function
+    """
+    if 'interval' in kwargs:
+        interval = kwargs['interval']
+        del kwargs['interval']
+    else:
+        interval = 10
+    if 'retry' in kwargs:
+        retry = kwargs['retry']
+        del kwargs['retry']
+    else:
+        retry = 10
+    for i in range(1, retry + 1):
+        try:
+            return func(*args, **kwargs)
+        except Exception:
+            if i == retry:
+                raise
+            else:
+                logger.warn('Function failed. Retrying {retry} more time(s) in {interval} second(s)'.format(retry=retry - i, interval=interval))
+                time.sleep(interval)
+
+
+def send_mail(mail_from, mail_to, subject, body, cc=None, bcc=None, smtp_server='localhost'):
     """
     Helper function to send a mail.
     Args:
@@ -109,7 +143,7 @@ def send_mail(mail_from, mail_to, subject, body, cc=None, bcc=None, smtpServer='
         mail_to.extend(bcc)
     part2 = MIMEText(body, 'html')
     msg.attach(part2)
-    server = smtplib.SMTP(smtpServer)
+    server = smtplib.SMTP(smtp_server)
     server.sendmail(msg['From'], mail_to, msg.as_string())
     server.quit()
 

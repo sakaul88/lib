@@ -11,17 +11,17 @@ class TestUtils(unittest.TestCase):
     def test_logger(self):
         logger = logging.getLogger()
         baseutils.configure_logger(logger, file_path='/tmp/logfile', level=logging.INFO)
-        self.assertTrue(isinstance(logger.handlers[0], logging.handlers.RotatingFileHandler))
-        self.assertTrue(isinstance(logger.handlers[0].formatter, logging.Formatter))
+        self.assertIsInstance(logger.handlers[0], logging.handlers.RotatingFileHandler)
+        self.assertIsInstance(logger.handlers[0].formatter, logging.Formatter)
         self.assertEqual(logging.INFO, logger.level)
         logger.handlers = []
         baseutils.configure_logger(logger, stream=True, json_formatter=True, level=logging.ERROR)
-        self.assertTrue(isinstance(logger.handlers[0].formatter, logmatic.JsonFormatter))
+        self.assertIsInstance(logger.handlers[0].formatter, logmatic.JsonFormatter)
         self.assertEqual(logging.ERROR, logger.level)
         logger.handlers = []
         formatter = logging.Formatter('[%(asctime)-15s] [unittests] %(levelname)s %(message)s')
         baseutils.configure_logger(logger, stream=True, formatter=formatter)
-        self.assertTrue(isinstance(logger.handlers[0], logging.StreamHandler))
+        self.assertIsInstance(logger.handlers[0], logging.StreamHandler)
         self.assertEqual(formatter, logger.handlers[0].formatter)
         formatter2 = logging.Formatter('[%(asctime)-15s] [unittests2] %(levelname)s %(message)s')
         baseutils.replace_logger_formatter(logger, formatter2)
@@ -35,11 +35,23 @@ class TestUtils(unittest.TestCase):
         custom_env['custom_value'] = custom_value
         self.assertEqual((0, custom_value), baseutils.exe_cmd('echo -n "${custom_value}"', env=custom_env))
 
+    def test_retry(self):
+        pid = os.getpid()
+        self.assertEquals(pid, baseutils.retry(os.getpid))
+        self.assertEquals(pid, baseutils.retry(os.getpid, retry=5, interval=5))
+        a = [1, 2]
+        self.assertEquals(len(a), baseutils.retry(len, a, interval=5))
+        try:
+            baseutils.retry(dict, 'value', retry=1, interval=1)
+            self.fail('baseutils.retry passed a failed attempt to create a dictionary')
+        except Exception as e:
+            self.assertIsInstance(e, ValueError)
+
     @patch('smtplib.SMTP')
     def test_send_mail(self, mock_smtp):
         mock_smtp_instance = mock_smtp.return_value
         baseutils.send_mail('unittest@travis.ibm.com', ['user1@ie.ibm.com'], 'Unit Test Email Subject', 'Unit Test Email Body',
-                            cc=['user2@ie.ibm.com'], bcc=['user3@ie.ibm.com'], smtpServer='localhost')
+                            cc=['user2@ie.ibm.com'], bcc=['user3@ie.ibm.com'], smtp_server='localhost')
         self.assertEqual(1, mock_smtp_instance.sendmail.call_count)
         self.assertEqual(('unittest@travis.ibm.com', ['user1@ie.ibm.com', 'user2@ie.ibm.com', 'user3@ie.ibm.com']), mock_smtp_instance.sendmail.call_args_list[0][0][0:2])
         self.assertEqual(1, mock_smtp_instance.quit.call_count)
