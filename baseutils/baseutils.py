@@ -78,9 +78,9 @@ def exe_cmd(cmd, working_dir=None, obfuscate=None, env=None, log_level=logging.I
     rc = p.wait()
     if rc:
         if raise_exception:
-            raise Exception('Error executing command: %s. RC: %s' % (obfus_cmd, rc,))
+            raise Exception('Error executing command: {cmd}. RC: {rc}'.format(cmd=obfus_cmd, rc=rc))
         else:
-            logger.error('Error executing command: %s.    RC: %s' % (obfus_cmd, rc))
+            logger.error('Error executing command: {cmd}. RC: {rc}'.format(cmd=obfus_cmd, rc=rc))
     logger.info('Command successful. Returning output')
     return (rc, output)
 
@@ -153,6 +153,7 @@ def shell_escape(value):
     Wraps a value in single quotes and escapes internal single quotes.
     Args:
         The value to escape for safe shell execution
+    Returns: The escaped parameter that is safe to pass into a shell command
     """
     return "'" + value.replace("'", "'\"'\"'") + "'"
 
