@@ -1,5 +1,6 @@
 import logging
 import logmatic
+import requests
 import signal
 import smtplib
 import subprocess
@@ -55,6 +56,26 @@ def replace_logger_formatter(custom_logger, formatter):
     """
     for handler in custom_logger.handlers:
         handler.setFormatter(formatter)
+
+
+def discover_github_latest_patch_version(version_to_match, release_url):
+    """
+    Given a major,minor version, or a major.minor.patch version, the vmajor.minor.latest_available version is discovered for a GitHub release url.
+    Args:
+        version_to_match: The initial version for which a lookup is being performed, eg. 1.0 or 1.0.1
+        release_url: URL to GitHub api for the release
+    Returns: The matched vmajor.minor.latest_available version, eg v1.0.2
+    """
+    releases = requests.get(release_url)
+    if not releases.ok:
+        raise Exception('Failed to retrieve releases from GitHub: {error}'.format(error=releases.text))
+    version_to_match = version_to_match.split('.')
+    version_to_match = 'v{major}.{minor}.'.format(major=version_to_match[0], minor=version_to_match[1])
+    for release in releases.json():
+        if release['tag_name'].startswith(version_to_match):
+            version = release['tag_name']
+            break
+    return version
 
 
 def exe_cmd(cmd, working_dir=None, obfuscate=None, stdin=None, env=None, log_level=logging.INFO, raise_exception=True):
