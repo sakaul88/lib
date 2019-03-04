@@ -57,18 +57,24 @@ def replace_logger_formatter(custom_logger, formatter):
         handler.setFormatter(formatter)
 
 
-def exe_cmd(cmd, working_dir=None, obfuscate=None, env=None, log_level=logging.INFO, raise_exception=True):
+def exe_cmd(cmd, working_dir=None, obfuscate=None, stdin=None, env=None, log_level=logging.INFO, raise_exception=True):
     """
     Helper function for easily executing a command.
         cmd: The command to execute
         working_dir: The directory to execution the command from (Optional)
         obfuscate: A value to obfuscate in the logging (Optional)
+        stdin: A string to pass as standard input to the process (Optional)
+        env: Custom environment variables to be used in place of parent envrionment variables (Optional, default: parent process environment variables)
         log_level: The default logging level. Default: INFO. Setting to None will disable logging in this function
         raise_exception: Whether to raise an exception if the command return a non-zero return code (Default: True)
     """
     obfus_cmd = cmd.replace(obfuscate, '***') if obfuscate else cmd
     logger.info('Executing: %s' % (obfus_cmd))
-    p = subprocess.Popen(cmd, shell=True, bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, cwd=working_dir, universal_newlines=True, env=env)
+    p = subprocess.Popen(cmd, shell=True, bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                         stdin=subprocess.PIPE if stdin else None, cwd=working_dir, universal_newlines=True, env=env)
+    if stdin:
+        p.stdin.write(stdin)
+        p.stdin.close()
     output = ''
     for line in iter(p.stdout.readline, ''):
         output += line
