@@ -27,6 +27,13 @@ class TestUtils(unittest.TestCase):
         baseutils.replace_logger_formatter(logger, formatter2)
         self.assertEqual(formatter2, logger.handlers[0].formatter)
 
+    def test_discover_github_latest_patch_version(self):
+        release_url = 'https://api.github.com/repos/kubernetes/kubernetes/releases'
+        version_not_passing_patch = baseutils.discover_github_latest_patch_release('1.12', release_url)
+        version_passing_patch = baseutils.discover_github_latest_patch_release('1.12.1', release_url)
+        self.assertEqual(version_not_passing_patch, version_passing_patch)
+        self.assertTrue(version_not_passing_patch.startswith('v1.12.'))
+
     def test_exe_cmd(self):
         self.assertEqual(baseutils.exe_cmd('echo -n value'), (0, 'value'))
         self.assertEqual((0, 'value'), baseutils.exe_cmd('echo -n "value"'))
