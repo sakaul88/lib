@@ -58,7 +58,7 @@ def replace_logger_formatter(custom_logger, formatter):
         handler.setFormatter(formatter)
 
 
-def discover_github_latest_patch_version(version_to_match, release_url):
+def discover_github_latest_patch_release(version_to_match, release_url):
     """
     Given a major,minor version, or a major.minor.patch version, the vmajor.minor.latest_available version is discovered for a GitHub release url.
     Args:
