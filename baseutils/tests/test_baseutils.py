@@ -34,6 +34,9 @@ class TestUtils(unittest.TestCase):
         custom_env = os.environ.copy()
         custom_env['custom_value'] = custom_value
         self.assertEqual((0, custom_value), baseutils.exe_cmd('echo -n "${custom_value}"', env=custom_env))
+        self.assertEqual((0, custom_value), baseutils.exe_cmd('less', stdin=custom_value))
+        (rc, output) = baseutils.exe_cmd('fakecmd', raise_exception=False)
+        self.assertEqual(127, rc)
 
     def test_retry(self):
         pid = os.getpid()
