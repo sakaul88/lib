@@ -58,15 +58,16 @@ def replace_logger_formatter(custom_logger, formatter):
         handler.setFormatter(formatter)
 
 
-def discover_github_latest_patch_release(version_to_match, release_url):
+def discover_github_latest_patch_release(version_to_match, release_url, pat=None):
     """
-    Given a major,minor version, or a major.minor.patch version, the vmajor.minor.latest_available version is discovered for a GitHub release url.
+    Given a major.minor version, or a major.minor.patch version, the vmajor.minor.latest_available version is discovered for a GitHub release url.
     Args:
         version_to_match: The initial version for which a lookup is being performed, eg. 1.0 or 1.0.1
         release_url: URL to GitHub api for the release
+        pat: An optional GitHub personal access token. Authenticated requests have higher rate limits (Optional)
     Returns: The matched vmajor.minor.latest_available version, eg v1.0.2
     """
-    releases = requests.get(release_url)
+    releases = requests.get(release_url, headers={'Authorization': 'token {pat}'.format(pat=pat)} if pat else None)
     if not releases.ok:
         raise Exception('Failed to retrieve releases from GitHub: {error}'.format(error=releases.text))
     version_to_match = version_to_match.split('.')
