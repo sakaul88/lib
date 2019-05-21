@@ -5,8 +5,13 @@ import signal
 import smtplib
 import subprocess
 import time
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEText import MIMEText
+try:  # python3
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+except ImportError:
+    from email.MIMEMultipart import MIMEMultipart
+    from email.MIMEText import MIMEText
+
 
 logger = logging.getLogger(__name__)
 

@@ -28,8 +28,6 @@ setup(
     install_requires=[
         'logmatic-python',
         'pyyaml',
-        # 'pyyaml==3.12',  # 4.1 is throwing the following on install. Remove this baked dependency should be retested at the earliest opportune time:
-        # ImportError: 'module' object has no attribute 'check_specifier'
         'requests'
     ],
 )
