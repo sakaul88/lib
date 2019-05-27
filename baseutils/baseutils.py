@@ -112,8 +112,8 @@ def exe_cmd(cmd, working_dir=None, obfuscate=None, stdin=None, env=None, log_lev
     if rc:
         if raise_exception:
             raise Exception('Error executing command: {cmd}. RC: {rc}'.format(cmd=obfus_cmd, rc=rc))
-        elif log_level != logging.NOTSET:  # User may be trying to avoid logging potentially expected failures, polluting the log
-            logger.error('Error executing command: {cmd}. RC: {rc}'.format(cmd=obfus_cmd, rc=rc))
+        else:
+            logger.info('Command returned RC {rc} but received instruction not to raise exception. This may be normal'.format(rc=rc))
     else:
         logger.info('Command successful. Returning output')
     return (rc, output)
