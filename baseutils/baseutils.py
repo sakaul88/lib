@@ -21,10 +21,11 @@ def configure_logger(custom_logger, file_path=None, stream=False, formatter=None
     Configure a logger in a standard way for python applications.
     Args:
         custom_logger: The logger to be configured
-        file_path: The path to a log file to use. If not provided, file logging will not be enabled
+        file_path: The path to a log file to use. If not provided, file logging will not be enabled (Optional)
         stream: Set True if logs should be streamed to standard out. (Default: False)
         formatter: A custom formatter to use. If not provided, standard formatter will be created. See arg json_formatter for details (Optional)
         json_formatter: If a formatter is not provided, this identifies if the formatter that will be created should be a json formatter (logmatics) or a standard formatter
+        level: The log level to configure (Optional, default: logging.INFO)
     """
     if file_path:
         handler = logging.handlers.RotatingFileHandler(file_path, backupCount=10, maxBytes=10240000)
@@ -111,7 +112,10 @@ def exe_cmd(cmd, working_dir=None, obfuscate=None, stdin=None, env=None, log_lev
     rc = p.wait()
     if rc:
         if raise_exception:
-            raise Exception('Error executing command: {cmd}. RC: {rc}'.format(cmd=obfus_cmd, rc=rc))
+            raise Exception('Error executing command: {cmd}. RC: {rc}. Output: {output}'.format(
+                cmd=obfus_cmd,
+                rc=rc,
+                output='***' if log_level == logging.NOTSET else output))
         else:
             logger.info('Command returned RC {rc} but received instruction not to raise exception. This may be normal'.format(rc=rc))
     else:
