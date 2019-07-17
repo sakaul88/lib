@@ -85,6 +85,7 @@ deploy:
   distributions: "sdist"
   on:
     condition: '$TRAVIS_EVENT_TYPE = push && -n "$ARTIFACTORY_USERNAME" && -n "$ARTIFACTORY_API_KEY" && $TRAVIS_TEST_RESULT == 0'
+    python: '3.6'
 
 after_deploy:
 - echo "Searching for python package in repository to validate deploy..."
