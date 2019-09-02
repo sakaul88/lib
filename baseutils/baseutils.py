@@ -152,7 +152,7 @@ def retry(func, *args, **kwargs):
             if i == retry:
                 raise
             else:
-                logger.warn('Function failed. Retrying {retry} more time(s) in {interval} second(s)'.format(retry=retry - i, interval=interval))
+                logger.warning('Function "{func}" failed. Retrying {retry} more time(s) in {interval} second(s)'.format(func=func.__name__, retry=retry - i, interval=interval))
                 time.sleep(interval)
 
 
