@@ -49,12 +49,12 @@ env:
   - PIP_REPO_NAME=wce-p2paas-pypi-local
 
 before_install:
-- export version=1.$(date "+%Y%m%d").$TRAVIS_BUILD_NUMBER
+- export version=1.$(date "+%Y%m%d").${TRAVIS_BUILD_NUMBER}
 - echo "Build version=$version"
 - cd $TRAVIS_BUILD_DIR
-- sed -ie "s/version='1.0.0'/version='$version'/" setup.py
+- sed -ie "s/version='1.0.0'/version='${version}'/" setup.py
 - cat setup.py
-- export ARTIFACTORY_USERNAME=$(if [[ -z "$ARTIFACTORY_USERNAME" ]]; then echo $INTRANET_USERNAME; else echo $ARTIFACTORY_USERNAME; fi)
+- export ARTIFACTORY_USERNAME=$(if [[ -z "${ARTIFACTORY_USERNAME}" ]]; then echo ${INTRANET_USERNAME}; else echo ${ARTIFACTORY_USERNAME}; fi)
 
 install:
 - pip install dateutils
@@ -69,25 +69,25 @@ before_script:
 - flake8 . --count --max-complexity=10 --max-line-length=180 --statistics
 
 script:
-- python -m unittest discover -s $TRAVIS_BUILD_DIR/baseutils/tests
+- python -m unittest discover -s ${TRAVIS_BUILD_DIR}/baseutils/tests
 
 before_deploy:
-- cd $TRAVIS_BUILD_DIR
+- cd ${TRAVIS_BUILD_DIR}
 
 deploy:
 - provider: pypi
-  user: $ARTIFACTORY_USERNAME
+  user: ${ARTIFACTORY_USERNAME}
   password:
-    secure: $ARTIFACTORY_API_KEY
-  server: https://$PIP_HOSTNAME/artifactory/api/pypi/$PIP_REPO_NAME
+    secure: ${ARTIFACTORY_API_KEY}
+  server: https://${PIP_HOSTNAME}/artifactory/api/pypi/${PIP_REPO_NAME}
   skip_upload_docs: true
   skip_cleanup: true
   distributions: "sdist"
   on:
-    condition: '$TRAVIS_EVENT_TYPE = push && -n "$ARTIFACTORY_USERNAME" && -n "$ARTIFACTORY_API_KEY" && $TRAVIS_TEST_RESULT == 0'
+    condition: '${TRAVIS_EVENT_TYPE} = push && -n "${ARTIFACTORY_USERNAME}" && -n "${ARTIFACTORY_API_KEY}" && ${TRAVIS_TEST_RESULT} == 0'
     python: "3.6"
 
 after_deploy:
 - echo "Searching for python package in repository to validate deploy..."
-- curl -u $ARTIFACTORY_USERNAME:$ARTIFACTORY_API_KEY https://$PIP_HOSTNAME/artifactory/list/$PIP_REPO_NAME/$PIP_MODULE_NAME/$version/ | grep ".tar.gz" || DEPLOY_FAILURE=true
-- if [[ $DEPLOY_FAILURE == 'true' ]]; then echo "Deploy phase failed.  Failed to find https://$PIP_HOSTNAME/artifactory/list/$PIP_REPO_NAME/$PIP_MODULE_NAME/$version on Artifactory server"; travis_terminate 1; fi
+- curl -u ${ARTIFACTORY_USERNAME}:${ARTIFACTORY_API_KEY} https://${PIP_HOSTNAME}/artifactory/list/${PIP_REPO_NAME}/${PIP_MODULE_NAME}/${version}/ | grep ".tar.gz" || DEPLOY_FAILURE=true
+- if [[ ${DEPLOY_FAILURE} == 'true' ]]; then echo "Deploy phase failed.  Failed to find https://${PIP_HOSTNAME}/artifactory/list/${PIP_REPO_NAME}/${PIP_MODULE_NAME}/${version} on Artifactory server"; travis_terminate 1; fi
