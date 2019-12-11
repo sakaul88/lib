@@ -140,13 +140,13 @@ class local_lock:
         with local_lock():
             do_something
     """
-    def __init__(self, lock_name='py_local_lock_file'):
+    def __init__(self, lock_name='local'):
         """
         Constructor for the lock object.
         Args:
             lock_name: The name of the lock. Contention for locks will only occur between locks with the same name. The value must be safe for use as a filename (Optional)
         """
-        self.lock_file_path = os.path.join(tempfile.gettempdir(), lock_name)
+        self.lock_file_path = os.path.join(tempfile.gettempdir(), 'py.{name}.lockfile'.format(name=lock_name))
         self.lock_file = None
 
     def __enter__(self):

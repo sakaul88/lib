@@ -67,10 +67,10 @@ class TestUtils(unittest.TestCase):
     def test_local_lock(self):
         # This is nix-specific and will not work on windows
         if sys.platform == 'win32':
-          with baseutils.local_lock():
-              self.assertTrue(True)
-          with baseutils.local_lock('lock_name'):
-              self.assertTrue(True)
+            with baseutils.local_lock():
+                self.assertTrue(True)
+            with baseutils.local_lock('lock_name'):
+                self.assertTrue(True)
 
     def test_retry(self):
         pid = os.getpid()
