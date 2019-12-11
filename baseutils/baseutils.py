@@ -1,9 +1,11 @@
 import logging
 import logmatic
+import os
 import requests
 import signal
 import smtplib
 import subprocess
+import tempfile
 import time
 try:  # python3
     from email.mime.multipart import MIMEMultipart
@@ -11,6 +13,10 @@ try:  # python3
 except ImportError:
     from email.MIMEMultipart import MIMEMultipart
     from email.MIMEText import MIMEText
+try:
+    import fcntl
+except ImportError:
+    pass  # fcntl is not available on Windows. The local_lock function will not work there
 
 
 logger = logging.getLogger(__name__)
@@ -121,6 +127,35 @@ def exe_cmd(cmd, working_dir=None, obfuscate=None, stdin=None, env=None, log_lev
     else:
         logger.info('Command successful. Returning output')
     return (rc, output)
+
+
+class local_lock:
+    """
+    A lock class to support locking against a local file. This allows some coordination between seperate processes on the same system.
+    This class is intended to be use via the 'with' syntax.
+    Only a single thread and single process may acquire the lock at one time on a given system.
+    Warning: A thread must not attempt to acquire the lock more than once.
+    This function does not work on Windows.
+    Example:
+        with local_lock():
+            do_something
+    """
+    def __init__(self, lock_name='local'):
+        """
+        Constructor for the lock object.
+        Args:
+            lock_name: The name of the lock. Contention for locks will only occur between locks with the same name. The value must be safe for use as a filename (Optional)
+        """
+        self.lock_file_path = os.path.join(tempfile.gettempdir(), 'py.{name}.lockfile'.format(name=lock_name))
+        self.lock_file = None
+
+    def __enter__(self):
+        self.lock_file = open(self.lock_file_path, 'w')
+        fcntl.flock(self.lock_file, fcntl.LOCK_EX)
+
+    def __exit__(self, type, value, traceback):
+        fcntl.flock(self.lock_file, fcntl.LOCK_UN)
+        self.lock_file.close()
 
 
 def retry(func, *args, **kwargs):

@@ -2,6 +2,7 @@ import logging
 import logmatic
 import os
 import shutil
+import sys
 import tempfile
 import unittest
 from mock import patch
@@ -35,10 +36,10 @@ class TestUtils(unittest.TestCase):
 
     def test_discover_github_latest_patch_version(self):
         release_url = 'https://api.github.com/repos/kubernetes/kubernetes/releases'
-        version_not_passing_patch = baseutils.discover_github_latest_patch_release('1.12', release_url)
-        version_passing_patch = baseutils.discover_github_latest_patch_release('1.12.1', release_url)
+        version_not_passing_patch = baseutils.discover_github_latest_patch_release('1.16', release_url)
+        version_passing_patch = baseutils.discover_github_latest_patch_release('1.16.1', release_url)
         self.assertEqual(version_not_passing_patch, version_passing_patch)
-        self.assertTrue(version_not_passing_patch.startswith('v1.12.'))
+        self.assertTrue(version_not_passing_patch.startswith('v1.16.'))
 
     def test_exe_cmd(self):
         self.assertEqual((0, 'value\n'), baseutils.exe_cmd('echo value'))
@@ -62,6 +63,14 @@ class TestUtils(unittest.TestCase):
             baseutils.exe_cmd('fake_cmd', log_level=logging.NOTSET)
         e_msg = str(context.exception)
         self.assertFalse('is not recognized' in e_msg or 'not found' in e_msg)
+
+    def test_local_lock(self):
+        # This is nix-specific and will not work on windows
+        if sys.platform == 'win32':
+            with baseutils.local_lock():
+                self.assertTrue(True)
+            with baseutils.local_lock('lock_name'):
+                self.assertTrue(True)
 
     def test_retry(self):
         pid = os.getpid()
