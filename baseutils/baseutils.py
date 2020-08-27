@@ -102,9 +102,15 @@ def exe_cmd(cmd, working_dir=None, obfuscate=None, stdin=None, env=None, log_lev
         log_level: The default logging level. Default: INFO. Setting to None will disable logging in this function
         raise_exception: Whether to raise an exception if the command return a non-zero return code (Default: True)
     """
+    if os.name == 'nt':
+        # needed for windows but fails test in Travis
+        encoding = 'utf-8'
+    else:
+        encoding = None
+
     obfus_cmd = cmd.replace(obfuscate, '***') if obfuscate else cmd
     logger.info('Executing: %s' % (obfus_cmd))
-    p = subprocess.Popen(cmd, shell=True, bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8',
+    p = subprocess.Popen(cmd, shell=True, bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding=encoding,
                          stdin=subprocess.PIPE if stdin else None, cwd=working_dir, universal_newlines=True, env=env)
     if stdin:
         p.stdin.write(stdin)
