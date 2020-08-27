@@ -251,17 +251,17 @@ def send_p2paas_slack(token, msg_title, msg_id=None, msg_severity=None, cluster=
     # todo, add token & title check
     lines = []
     lines.append(msg_title)
-    if msg_id is not None: 
+    if msg_id is not None:
         # todo: check for prefix and 0 padding
         lines.append('Message Id: {}'.format(msg_id))
-    if msg_severity is not None: 
+    if msg_severity is not None:
         # todo: convert numbers to words
         lines.append('Severity: {}'.format(msg_severity))
-    if cluster is not None: 
+    if cluster is not None:
         lines.append('Cluster: {}'.format(cluster))
-    if job is not None: 
+    if job is not None:
         lines.append('AWX Job: {}'.format(job))
-    if msg_details is not None: 
+    if msg_details is not None:
         lines.append('```{}'.format(msg_details))
 
     message = '\n'.join(lines)
