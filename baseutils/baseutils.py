@@ -109,10 +109,10 @@ def exe_cmd(cmd, working_dir=None, obfuscate=None, stdin=None, env=None, log_lev
     if os.name == 'nt':
         # the encoding is needed but it fails in travis
         p = subprocess.Popen(cmd, shell=True, bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8',
-                         stdin=subprocess.PIPE if stdin else None, cwd=working_dir, universal_newlines=True, env=env)
+                            stdin=subprocess.PIPE if stdin else None, cwd=working_dir, universal_newlines=True, env=env)
     else:
         p = subprocess.Popen(cmd, shell=True, bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                        stdin=subprocess.PIPE if stdin else None, cwd=working_dir, universal_newlines=True, env=env)
+                            stdin=subprocess.PIPE if stdin else None, cwd=working_dir, universal_newlines=True, env=env)
 
     if stdin:
         p.stdin.write(stdin)
