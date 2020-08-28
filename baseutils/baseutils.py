@@ -270,7 +270,7 @@ def send_p2paas_slack(token, msg_title, msg_id=None, msg_severity=None, cluster=
     if job is not None:
         lines.append('AWX Job: {}'.format(job))
     if msg_details is not None:
-        lines.append('```{}'.format(msg_details))
+        lines.append('```{}```'.format(msg_details))
 
     message = '\n'.join(lines)
     logger.debug('Sending {} lines to slack'.format(len(lines)))
