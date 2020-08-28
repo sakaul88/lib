@@ -256,7 +256,7 @@ def send_slack(token, channel, message):
 
 
 def send_p2paas_slack(token, msg_title, msg_id=None, msg_severity=None, cluster=None, job=None, msg_details=None):
-    # todo: 
+    # todo:
     # add token/title check?
     # add optional playbook field?
     # add random icons?
