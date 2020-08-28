@@ -256,15 +256,26 @@ def send_slack(token, channel, message):
 
 
 def send_p2paas_slack(token, msg_title, msg_id=None, msg_severity=None, cluster=None, job=None, msg_details=None):
-    # todo, add token & title check
+    # todo: 
+    # add token/title check?
+    # add optional playbook field?
+    # add random icons?
     lines = []
     lines.append(msg_title)
     if msg_id is not None:
         # todo: check for prefix and 0 padding
         lines.append('Message Id: {}'.format(msg_id))
     if msg_severity is not None:
-        # todo: convert numbers to words
-        lines.append('Severity: {}'.format(msg_severity))
+        # todo: add icon / colour?
+        sev = msg_severity
+        if (msg_severity == 1):
+            sev = 'High'
+            # add @here?
+        elif (msg_severity == 2):
+            sev = 'Medium'
+        elif (msg_severity == 3):
+            sev = 'Low'
+        lines.append('Severity: {}'.format(sev))
     if cluster is not None:
         lines.append('Cluster: {}'.format(cluster))
     if job is not None:
