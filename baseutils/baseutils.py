@@ -243,6 +243,13 @@ def shell_escape(value):
 
 
 def send_slack(token, channel, message):
+    """
+    Single function to be used when sending slack message.
+    Args:
+        token: The token to use for auth
+        channel: The channel to send the message to
+        message: The content of the message
+    """
     if os.name == 'nt':
         command = 'slack-cli'
     else:
@@ -255,11 +262,24 @@ def send_slack(token, channel, message):
         message=shell_escape(message)), obfuscate=token)
 
 
-def send_p2paas_slack(token, msg_title, msg_id=None, msg_severity=None, cluster=None, job=None, msg_details=None):
+def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, cluster=None, job=None, msg_details=None):
+    """
+    Helper function that should be used when submitting messages to wce-p2paas-orch-squad that will ensure consistent messages.
+    Args:
+        token: The token to use for auth
+        msg_title: The title (ie first line) of the message
+        msg_id (optional but strongly recommended): An id that uniquely identifies the scenario/caller. 
+            This allows people to easily track the message back to the code that created it.
+            This should follow a format of prefix_####, ex: PAIO_0001
+        msg_severity (optional but strongly recommended): 1, 2 or 3
+        cluster (optional): the cluster the message applies to. If the message applies to multiple clusters then the cluster names should be included with the details.
+        job (optional): A link to the awx job that triggered the message
+        msg_details (optional but strongly recommended): The main message content.
+    """
     # todo:
     # add token/title check?
     # add optional playbook field?
-    # add random icons?
+    # add random icons? :)
     lines = []
     lines.append(msg_title)
     if msg_id is not None:
@@ -275,6 +295,8 @@ def send_p2paas_slack(token, msg_title, msg_id=None, msg_severity=None, cluster=
             sev = 'Medium'
         elif (msg_severity == 3):
             sev = 'Low'
+        else:
+            sev = 'Unknown'
         lines.append('Severity: {}'.format(sev))
     if cluster is not None:
         lines.append('Cluster: {}'.format(cluster))
