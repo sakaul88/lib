@@ -268,7 +268,7 @@ def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, clu
     Args:
         token: The token to use for auth
         msg_title: The title (ie first line) of the message
-        msg_id (optional but strongly recommended): An id that uniquely identifies the scenario/caller. 
+        msg_id (optional but strongly recommended): An id that uniquely identifies the scenario/caller.
             This allows people to easily track the message back to the code that created it.
             This should follow a format of prefix_####, ex: PAIO_0001
         msg_severity (optional but strongly recommended): 1, 2 or 3
