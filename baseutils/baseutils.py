@@ -102,10 +102,18 @@ def exe_cmd(cmd, working_dir=None, obfuscate=None, stdin=None, env=None, log_lev
         log_level: The default logging level. Default: INFO. Setting to None will disable logging in this function
         raise_exception: Whether to raise an exception if the command return a non-zero return code (Default: True)
     """
+
     obfus_cmd = cmd.replace(obfuscate, '***') if obfuscate else cmd
     logger.info('Executing: %s' % (obfus_cmd))
-    p = subprocess.Popen(cmd, shell=True, bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                         stdin=subprocess.PIPE if stdin else None, cwd=working_dir, universal_newlines=True, env=env)
+
+    if os.name == 'nt':
+        # the encoding is needed but it fails in travis
+        p = subprocess.Popen(cmd, shell=True, bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8',
+                             stdin=subprocess.PIPE if stdin else None, cwd=working_dir, universal_newlines=True, env=env)
+    else:
+        p = subprocess.Popen(cmd, shell=True, bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                             stdin=subprocess.PIPE if stdin else None, cwd=working_dir, universal_newlines=True, env=env)
+
     if stdin:
         p.stdin.write(stdin)
         p.stdin.close()
@@ -228,7 +236,45 @@ def shell_escape(value):
         The value to escape for safe shell execution
     Returns: The escaped parameter that is safe to pass into a shell command
     """
-    return "'" + value.replace("'", "'\"'\"'") + "'"
+    if os.name == 'nt':
+        return '"' + value.replace('"', '\\"') + '"'
+    else:
+        return "'" + value.replace("'", "'\"'\"'") + "'"
+
+
+def send_slack(token, channel, message):
+    if os.name == 'nt':
+        command = 'slack-cli'
+    else:
+        command = '/bin/slack-cli'
+
+    exe_cmd('{command} -t {token} -d {channel} {message}'.format(
+        command=command,
+        token=shell_escape(token),
+        channel=shell_escape(channel),
+        message=shell_escape(message)), obfuscate=token)
+
+
+def send_p2paas_slack(token, msg_title, msg_id=None, msg_severity=None, cluster=None, job=None, msg_details=None):
+    # todo, add token & title check
+    lines = []
+    lines.append(msg_title)
+    if msg_id is not None:
+        # todo: check for prefix and 0 padding
+        lines.append('Message Id: {}'.format(msg_id))
+    if msg_severity is not None:
+        # todo: convert numbers to words
+        lines.append('Severity: {}'.format(msg_severity))
+    if cluster is not None:
+        lines.append('Cluster: {}'.format(cluster))
+    if job is not None:
+        lines.append('AWX Job: {}'.format(job))
+    if msg_details is not None:
+        lines.append('```{}'.format(msg_details))
+
+    message = '\n'.join(lines)
+    logger.debug('Sending {} lines to slack'.format(len(lines)))
+    send_slack(token, 'wce-p2paas-orch-squad', message)
 
 
 class timeout:
