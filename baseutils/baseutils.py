@@ -34,7 +34,7 @@ def configure_logger(custom_logger, file_path=None, stream=False, formatter=None
         level: The log level to configure (Optional, default: logging.INFO)
     """
     if file_path:
-        handler = logging.handlers.RotatingFileHandler(file_path, backupCount=10, maxBytes=20971520)
+        handler = logging.handlers.RotatingFileHandler(file_path, backupCount=10, maxBytes=52428800)
         _add_logger_handler(custom_logger, handler, formatter)
     if stream:
         handler = logging.StreamHandler()
