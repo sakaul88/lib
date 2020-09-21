@@ -51,6 +51,8 @@ env:
 before_install:
 - export version=1.$(date "+%Y%m%d").${TRAVIS_BUILD_NUMBER}
 - echo "Build version=$version"
+- export BRANCH=$(if [ "${TRAVIS_PULL_REQUEST}" == "false" ]; then echo $TRAVIS_BRANCH; else echo ${TRAVIS_PULL_REQUEST_BRANCH}; fi)
+- 'if [[ "${BRANCH}" != "master" ]]; then export version=${version}-$BRANCH; echo "Build version updated to include branch. version=${version}"; fi'
 - cd $TRAVIS_BUILD_DIR
 - sed -ie "s/version='1.0.0'/version='${version}'/" setup.py
 - cat setup.py
@@ -86,6 +88,7 @@ deploy:
   on:
     condition: '${TRAVIS_EVENT_TYPE} = push && -n "${ARTIFACTORY_USERNAME}" && -n "${ARTIFACTORY_API_KEY}" && ${TRAVIS_TEST_RESULT} == 0'
     python: "3.6"
+    all_branches: true
 
 after_deploy:
 - echo "Searching for python package in repository to validate deploy..."
