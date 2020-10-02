@@ -4,8 +4,10 @@ import os
 import shutil
 import sys
 import tempfile
+import time
 import unittest
 from mock import patch
+from multiprocessing import TimeoutError
 
 import baseutils
 
@@ -83,6 +85,13 @@ class TestUtils(unittest.TestCase):
             self.fail('baseutils.retry passed a failed attempt to create a dictionary')
         except Exception as e:
             self.assertIsInstance(e, ValueError)
+        try:
+            baseutils.retry(time.sleep, 2, retry=1, interval=1, timeout=3)
+        except TimeoutError:
+            self.fail("Timeout triggered before it should")
+        with self.assertRaises(TimeoutError):
+            baseutils.retry(time.sleep, 2, retry=1, interval=1, timeout=1)
+            self.fail('baseutils.retry passed a failed attempt to create a dictionary')
 
     @patch('smtplib.SMTP')
     def test_send_mail(self, mock_smtp):
