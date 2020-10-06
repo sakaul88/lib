@@ -6,6 +6,7 @@ import signal
 import smtplib
 import subprocess
 import tempfile
+import multiprocessing
 import time
 try:  # python3
     from email.mime.multipart import MIMEMultipart
@@ -176,8 +177,13 @@ def retry(func, *args, **kwargs):
         **kwargs: Any keyword arguments that are passed to the function
         interval: The time between retries. This parameter will be removed from kwargs before forwarding to the function (Optional, default: 10 seconds)
         retry: The number of times to retry. This parameter will be removed from kwargs before forwarding to the function (Optional, default: 10)
+        timeout: Time in seconds to wait before canceling the retry attempt. This parameter will be removed from kwargs before forwarding to the function (Optional, default: None)
     Returns: The return value of the passed function
     """
+    def terminate_pool(p):
+        p.terminate()
+        p.close()
+
     if 'interval' in kwargs:
         interval = kwargs['interval']
         del kwargs['interval']
@@ -188,10 +194,23 @@ def retry(func, *args, **kwargs):
         del kwargs['retry']
     else:
         retry = 10
+    if 'timeout' in kwargs:
+        timeout = kwargs['timeout']
+        del kwargs['timeout']
+    else:
+        timeout = None
     for i in range(1, retry + 1):
+        pool = multiprocessing.Pool(processes=1)
         try:
-            return func(*args, **kwargs)
+            if timeout:
+                async_result = pool.apply_async(func=func, args=args, kwds=kwargs)
+                result = async_result.get(timeout=timeout)
+            else:
+                result = func(*args, **kwargs)
+            terminate_pool(pool)
+            return result
         except Exception:
+            terminate_pool(pool)
             if i == retry:
                 raise
             else:
