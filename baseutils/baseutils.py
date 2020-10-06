@@ -176,13 +176,8 @@ def retry(func, *args, **kwargs):
         **kwargs: Any keyword arguments that are passed to the function
         interval: The time between retries. This parameter will be removed from kwargs before forwarding to the function (Optional, default: 10 seconds)
         retry: The number of times to retry. This parameter will be removed from kwargs before forwarding to the function (Optional, default: 10)
-        timeout: Time in seconds to wait before canceling the retry attempt. This parameter will be removed from kwargs before forwarding to the function (Optional, default: None)
     Returns: The return value of the passed function
     """
-    def terminate_pool(p):
-        p.terminate()
-        p.close()
-
     if 'interval' in kwargs:
         interval = kwargs['interval']
         del kwargs['interval']
