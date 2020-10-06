@@ -6,7 +6,6 @@ import signal
 import smtplib
 import subprocess
 import tempfile
-import multiprocessing
 import time
 try:  # python3
     from email.mime.multipart import MIMEMultipart
@@ -194,23 +193,10 @@ def retry(func, *args, **kwargs):
         del kwargs['retry']
     else:
         retry = 10
-    if 'timeout' in kwargs:
-        timeout = kwargs['timeout']
-        del kwargs['timeout']
-    else:
-        timeout = None
     for i in range(1, retry + 1):
-        pool = multiprocessing.Pool(processes=1)
         try:
-            if timeout:
-                async_result = pool.apply_async(func=func, args=args, kwds=kwargs)
-                result = async_result.get(timeout=timeout)
-            else:
-                result = func(*args, **kwargs)
-            terminate_pool(pool)
-            return result
+            return func(*args, **kwargs)
         except Exception:
-            terminate_pool(pool)
             if i == retry:
                 raise
             else:
