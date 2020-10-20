@@ -273,7 +273,9 @@ def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, clu
             This should follow a format of prefix_####, ex: PAIO_0001
         msg_severity (optional but strongly recommended): 1, 2 or 3
         cluster (optional): the cluster the message applies to. If the message applies to multiple clusters then the cluster names should be included with the details.
-        job (optional): A link to the awx job that triggered the message
+        job name: pulled from environ.get('tower_job_template_name')
+        job id: pulled from os.environ['tower_job_id']
+        job: no longer used, replaced by tower_job_id
         msg_details (optional but strongly recommended): The main message content.
     """
     # todo:
@@ -286,7 +288,7 @@ def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, clu
         # todo: add icon / colour?
         sev = msg_severity
         if (msg_severity == 1):
-            sev = 'High'
+            sev = '*High*'
             # add @here?
         elif (msg_severity == 2):
             sev = 'Medium'
