@@ -281,7 +281,7 @@ def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, clu
     # add optional playbook field?
     # add random icons? :)
     lines = []
-    lines.append('*{msg_id}: {}*'.format(msg_id, msg_title))
+    lines.append('*{msg_id}: {msg_title}*'.format(msg_id=msg_id, msg_title=msg_title))
     if msg_severity is not None:
         # todo: add icon / colour?
         sev = msg_severity
