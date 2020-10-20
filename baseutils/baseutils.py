@@ -300,12 +300,11 @@ def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, clu
         lines.append('Severity: {}'.format(sev))
     if cluster is not None:
         lines.append('Cluster: {}'.format(cluster))
-    if 'tower_job_template_name' in os.environ:
-        lines.append('AWX Template: {}'.format(os.environ['tower_job_template_name']))
-    if 'tower_job_id' in os.environ:
-        lines.append('AWX Job: {}'.format(os.environ['tower_job_id']))
-    if job is not None:
-        lines.append('AWX Job: {}'.format(job))
+    job_name = os.environ.get('tower_job_template_name', 'Unknown')
+    lines.append('AWX Template: {}'.format(job_name))
+    job_id = os.environ.get('tower_job_id', 'Unknown')
+    lines.append('AWX Job: {}'.format(job_id)
+
     if msg_details is not None:
         lines.append('```{}```'.format(msg_details))
 
