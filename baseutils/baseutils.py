@@ -262,7 +262,7 @@ def send_slack(token, channel, message):
         message=shell_escape(message)), obfuscate=token)
 
 
-def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, cluster=None, job=None, msg_details=None):
+def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, cluster=None, job=None, msg_details=None):  # noqa: C901
     """
     Helper function that should be used when submitting messages to wce-p2paas-orch-squad that will ensure consistent messages.
     Args:
