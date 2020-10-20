@@ -262,7 +262,7 @@ def send_slack(token, channel, message):
         message=shell_escape(message)), obfuscate=token)
 
 
-def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, cluster=None, job=None, msg_details=None):
+def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, cluster=None, job=None, msg_details=None):  # noqa: C901
     """
     Helper function that should be used when submitting messages to wce-p2paas-orch-squad that will ensure consistent messages.
     Args:
@@ -273,7 +273,9 @@ def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, clu
             This should follow a format of prefix_####, ex: PAIO_0001
         msg_severity (optional but strongly recommended): 1, 2 or 3
         cluster (optional): the cluster the message applies to. If the message applies to multiple clusters then the cluster names should be included with the details.
-        job (optional): A link to the awx job that triggered the message
+        job name: pulled from environ.get('tower_job_template_name')
+        job id: pulled from os.environ['tower_job_id']
+        job: no longer used, replaced by tower_job_id
         msg_details (optional but strongly recommended): The main message content.
     """
     # todo:
@@ -281,15 +283,12 @@ def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, clu
     # add optional playbook field?
     # add random icons? :)
     lines = []
-    lines.append(msg_title)
-    if msg_id is not None:
-        # todo: check for prefix and 0 padding
-        lines.append('Message Id: {}'.format(msg_id))
+    lines.append('*{msg_id}: {msg_title}*'.format(msg_id=msg_id, msg_title=msg_title))
     if msg_severity is not None:
         # todo: add icon / colour?
         sev = msg_severity
         if (msg_severity == 1):
-            sev = 'High'
+            sev = '*High*'
             # add @here?
         elif (msg_severity == 2):
             sev = 'Medium'
@@ -300,8 +299,11 @@ def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, clu
         lines.append('Severity: {}'.format(sev))
     if cluster is not None:
         lines.append('Cluster: {}'.format(cluster))
-    if job is not None:
-        lines.append('AWX Job: {}'.format(job))
+    job_name = os.environ.get('tower_job_template_name', 'Unknown')
+    lines.append('AWX Template: {}'.format(job_name))
+    job_id = os.environ.get('tower_job_id', 'Unknown')
+    lines.append('AWX Job: {}'.format(job_id))
+
     if msg_details is not None:
         lines.append('```{}```'.format(msg_details))
 
