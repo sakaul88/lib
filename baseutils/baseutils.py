@@ -1,6 +1,7 @@
 import logging
 import logmatic
 import os
+import sys
 import requests
 import signal
 import smtplib
@@ -106,8 +107,8 @@ def exe_cmd(cmd, working_dir=None, obfuscate=None, stdin=None, env=None, log_lev
     obfus_cmd = cmd.replace(obfuscate, '***') if obfuscate else cmd
     logger.info('Executing: %s' % (obfus_cmd))
 
-    if os.name == 'nt':
-        # the encoding is needed but it fails in travis
+    if os.name == 'nt' and sys.version_info[0] == 3:
+        # the encoding is needed for windows & python3
         p = subprocess.Popen(cmd, shell=True, bufsize=0, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, encoding='utf-8',
                              stdin=subprocess.PIPE if stdin else None, cwd=working_dir, universal_newlines=True, env=env)
     else:
