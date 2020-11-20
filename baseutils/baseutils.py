@@ -22,6 +22,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
 def assert_linux():
     """
     Throws an exception if the os is Windows.
@@ -29,6 +30,7 @@ def assert_linux():
     """
     if os.name == 'nt':
         raise Exception('This function currently does not support Windows')
+
 
 def configure_logger(custom_logger, file_path=None, stream=False, formatter=None, json_formatter=False, level=logging.INFO):
     """

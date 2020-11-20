@@ -1,0 +1,14 @@
+#!/bin/sh
+# to enable this, run 'git config core.hooksPath .githooks'
+
+which flake8 >/dev/null 2>&1
+if [ "$?" -ne "0" ]; then
+	echo 'Cannot find flake8 on path so git pre-commit hook cannot continue. Try running "pip install flake8"'
+	exit 1
+fi
+
+flake8 . --count --max-complexity=10 --max-line-length=180 --statistics --extend-exclude build/ >/dev/null 2>&1
+if [ "$?" -ne "0" ]; then
+	echo -e 'Errors were found when running flake8, they must be corrected before you can commit your changes.'
+	exit 1
+fi
