@@ -1,4 +1,6 @@
-.vscode/launch.json
+*.pyc
+**/__pycache__
+**/.pytest_cache/
 build/
 *.egg-info/
 dist/

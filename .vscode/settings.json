@@ -1,0 +1,7 @@
+{
+    // VSCode didn't always respect my path so I had to use this 
+    // Customize if needed
+    // "python.pythonPath": "C:\\dev\\Python38-32\\python.exe",
+    "python.formatting.provider": "autopep8",
+    "python.formatting.autopep8Args": ["max-line-length=180"]
+}

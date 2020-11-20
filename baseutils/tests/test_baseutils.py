@@ -2,10 +2,14 @@ import logging
 import logmatic
 import os
 import shutil
-import sys
 import tempfile
 import unittest
-from mock import patch
+try:
+    # python2
+    from mock import patch
+except ImportError:
+    # python3
+    from unittest.mock import patch
 
 import baseutils
 
@@ -66,7 +70,7 @@ class TestUtils(unittest.TestCase):
 
     def test_local_lock(self):
         # This is nix-specific and will not work on windows
-        if sys.platform == 'win32':
+        if os.name != 'nt':
             with baseutils.local_lock():
                 self.assertTrue(True)
             with baseutils.local_lock('lock_name'):
@@ -94,7 +98,12 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(1, mock_smtp_instance.quit.call_count)
 
     def test_shell_escape(self):
-        self.assertEqual(baseutils.shell_escape('a\'b'), '\'a\'"\'"\'b\'')
+        if os.name == 'nt':
+            self.assertEqual(baseutils.shell_escape('ab'), '"ab"')
+            self.assertEqual(baseutils.shell_escape('a"b'), '"a\\"b"')
+            self.assertEqual(baseutils.shell_escape('a\'b'), '"a\'b\"')
+        else:
+            self.assertEqual(baseutils.shell_escape('a\'b'), '\'a\'"\'"\'b\'')
 
     def test_timeout(self):
         timeout = baseutils.timeout()
