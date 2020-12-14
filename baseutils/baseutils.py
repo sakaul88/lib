@@ -269,7 +269,8 @@ def send_slack(token, channel, message):
         command=command,
         token=shell_escape(token),
         channel=shell_escape(channel),
-        message=shell_escape(message)), obfuscate=token)
+        message=shell_escape(message)), obfuscate=token,
+        raise_exception=False)
 
 
 def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, cluster=None, job=None, msg_details=None):  # noqa: C901
