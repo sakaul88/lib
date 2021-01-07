@@ -1,3 +1,4 @@
+import json
 import logging
 import logmatic
 import os
@@ -254,23 +255,26 @@ def shell_escape(value):
 
 def send_slack(token, channel, message):
     """
-    Single function to be used when sending slack message.
+    Single function to send message to Slack using Incoming Webhook and REST API.
     Args:
-        token: The token to use for auth
+        webhook: The webhook token to use for auth
         channel: The channel to send the message to
         message: The content of the message
     """
-    if os.name == 'nt':
-        command = 'slack-cli'
-    else:
-        command = '/bin/slack-cli'
-
-    exe_cmd('{command} -t {token} -d {channel} {message}'.format(
-        command=command,
-        token=shell_escape(token),
-        channel=shell_escape(channel),
-        message=shell_escape(message)), obfuscate=token,
-        raise_exception=False)
+    url = 'https://hooks.slack.com{webhook}'.format(webhook=token)
+    headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
+    data = {
+        'username': 'p2paas-notifications',
+        'channel': channel,
+        'text': message,
+        'icon_emoji': ':p2paas'
+    }
+    response = requests.post(url=url, headers=headers, data=json.dumps(data))
+    if not response.ok:
+        logger.error('Failed to post to Slack channel {channel}: {err}'.format(channel=channel, err=response.text))
 
 
 def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, cluster=None, job=None, msg_details=None):  # noqa: C901
