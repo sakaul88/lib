@@ -255,26 +255,28 @@ def shell_escape(value):
 
 def send_slack(token, channel, message):
     """
-    Single function to send message to Slack using Incoming Webhook and REST API.
+    Single function to send message to Slack using Slack app and web API.
     Args:
-        webhook: The webhook token to use for auth
+        token: The access token for Slack app
         channel: The channel to send the message to
         message: The content of the message
     """
-    url = 'https://hooks.slack.com{webhook}'.format(webhook=token)
+    url = 'https://slack.com/api/chat.postMessage'
     headers = {
         'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer {}'.format(token)
     }
     data = {
-        'username': 'p2paas-notifications',
         'channel': channel,
         'text': message,
-        'icon_emoji': ':p2paas'
     }
-    response = requests.post(url=url, headers=headers, data=json.dumps(data))
-    if not response.ok:
-        logger.error('Failed to post to Slack channel {channel}: {err}'.format(channel=channel, err=response.text))
+    try:
+        response = requests.post(url=url, headers=headers, data=json.dumps(data))
+        if not response.ok:
+            logger.error('Failed to post to Slack channel {channel}: {err}'.format(channel=channel, err=response.text))
+    except Exception as err:
+        logger.error('Error posting to Slack channel: {}'.format(err))
 
 
 def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, cluster=None, job=None, msg_details=None):  # noqa: C901
