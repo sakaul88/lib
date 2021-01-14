@@ -275,7 +275,7 @@ def send_slack(token, channel, message):
 
 def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, cluster=None, job=None, msg_details=None):  # noqa: C901
     """
-    Helper function that should be used when submitting messages to wce-p2paas-orch-squad that will ensure consistent messages.
+    Helper function that should be used when submitting messages to p2paas-awx-alerts that will ensure consistent messages.
     Args:
         token: The token to use for auth
         msg_title: The title (ie first line) of the message
@@ -320,7 +320,7 @@ def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, clu
 
     message = '\n'.join(lines)
     logger.debug('Sending {} lines to slack'.format(len(lines)))
-    send_slack(token, 'wce-p2paas-orch-squad', message)
+    send_slack(token, 'p2paas-awx-alerts', message)
 
 
 class timeout:
