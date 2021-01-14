@@ -95,7 +95,7 @@ def discover_github_latest_patch_release(version_to_match, release_url, pat=None
         raise Exception('Failed to retrieve releases from GitHub: {error}'.format(error=releases.text))
     version_to_match = version_to_match.split('.')
     version_to_match = 'v{major}.{minor}.'.format(major=version_to_match[0], minor=version_to_match[1])
-    version = None
+    version = ''
     for release in releases.json():
         if release['tag_name'].startswith(version_to_match):
             version = release['tag_name']
