@@ -39,11 +39,12 @@ class TestUtils(unittest.TestCase):
             shutil.rmtree(tmpdir)
 
     def test_discover_github_latest_patch_version(self):
+        # As newer versions of K8 are added, we have to change the versions used below
         release_url = 'https://api.github.com/repos/kubernetes/kubernetes/releases'
-        version_not_passing_patch = baseutils.discover_github_latest_patch_release('1.16', release_url)
-        version_passing_patch = baseutils.discover_github_latest_patch_release('1.16.1', release_url)
+        version_not_passing_patch = baseutils.discover_github_latest_patch_release('1.17', release_url)
+        version_passing_patch = baseutils.discover_github_latest_patch_release('1.17.1', release_url)
         self.assertEqual(version_not_passing_patch, version_passing_patch)
-        self.assertTrue(version_not_passing_patch.startswith('v1.16.'))
+        self.assertTrue(version_not_passing_patch.startswith('v1.17.'))
 
     def test_exe_cmd(self):
         self.assertEqual((0, 'value\n'), baseutils.exe_cmd('echo value'))
