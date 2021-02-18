@@ -6,6 +6,7 @@ Low level library for common functions needed by different scripts and libraries
 * .vscode/launch.json contains a launch configuration to run the tests from VSCode
   * if windows & Python 2.7, the following is required
       * pip intall mock
+  * you might have to modify python.pythonPath in .vscode/launch.json
 * to enable git commit hooks, run the following:
     * git config core.hooksPath .githooks
     * pip install pep8
