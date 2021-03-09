@@ -261,6 +261,7 @@ def send_slack(token, channel, message, attachments=[]):
         token: The access token for Slack app
         channel: The channel to send the message to
         message: The content of the message
+        attachments: Message attachments formatted as array of JSON objects.
     """
     url = 'https://slack.com/api/chat.postMessage'
     headers = {
