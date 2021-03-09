@@ -254,7 +254,7 @@ def shell_escape(value):
         return "'" + value.replace("'", "'\"'\"'") + "'"
 
 
-def send_slack(token, channel, message):
+def send_slack(token, channel, message, attachments=[]):
     """
     Single function to send message to Slack using Slack app and web API.
     Args:
@@ -271,6 +271,7 @@ def send_slack(token, channel, message):
     data = {
         'channel': channel,
         'text': message,
+        'attachments': attachments
     }
     try:
         response = requests.post(url=url, headers=headers, data=json.dumps(data))
