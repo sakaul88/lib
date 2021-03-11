@@ -254,14 +254,13 @@ def shell_escape(value):
         return "'" + value.replace("'", "'\"'\"'") + "'"
 
 
-def send_slack(token, channel, message, attachments=[]):
+def send_slack(token, channel, message):
     """
     Single function to send message to Slack using Slack app and web API.
     Args:
         token: The access token for Slack app
         channel: The channel to send the message to
         message: The content of the message
-        attachments: Message attachments formatted as array of JSON objects.
     """
     url = 'https://slack.com/api/chat.postMessage'
     headers = {
@@ -272,14 +271,47 @@ def send_slack(token, channel, message, attachments=[]):
     data = {
         'channel': channel,
         'text': message,
-        'attachments': attachments
     }
     try:
         response = requests.post(url=url, headers=headers, data=json.dumps(data))
-        if not response.ok:
+        json_response = json.loads(response)
+        if not json_response['ok']:
             logger.error('Failed to post to Slack channel {channel}: {err}'.format(channel=channel, err=response.text))
     except Exception as err:
         logger.error('Error posting to Slack channel: {}'.format(err))
+
+
+def upload_file_slack(token, channels, file_path, message=''):
+    """
+    Share a file to Slack using Slack app and web API
+    Args:
+        token: The access token for Slack app
+        channels: Comma delimited list of the channel(s) to send the file
+        file: Location of file to share
+        message: Message to accompany attachment (optional)
+    """
+    url = 'https://slack.com/api/files.upload'
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer {}'.format(token)
+    }
+    files = {
+        'file': open(file_path, 'rb')
+    }
+    data = {
+        'channels': channels
+    }
+
+    if message:
+        data['initial_comment'] = message
+
+    try:
+        response = requests.post(url=url, headers=headers, files=files, data=data)
+        json_response = json.loads(response.text)
+        if not json_response['ok']:
+            logger.error('Failed to post to Slack channel(s) {channels}: {err}'.format(channels=channels, err=response.text))
+    except Exception as err:
+        logger.error('Error posting to Slack channel(s): {}'.format(err))
 
 
 def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, cluster=None, job=None, msg_details=None):  # noqa: C901
