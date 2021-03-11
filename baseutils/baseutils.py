@@ -279,7 +279,7 @@ def send_slack(token, channel, message):
     }
     try:
         response = requests.post(url=url, headers=headers, data=json.dumps(data))
-        json_response = json.loads(response)
+        json_response = json.loads(response.text)
         if not json_response['ok']:
             logger.error('Failed to post to Slack channel {channel}: {err}'.format(channel=channel, err=response.text))
     except Exception as err:
