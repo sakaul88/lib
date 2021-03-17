@@ -103,7 +103,7 @@ def discover_github_latest_patch_release(version_to_match, release_url, pat=None
     return version
 
 
-def exe_cmd(cmd, working_dir=None, obfuscate=None, stdin=None, env=None, log_level=logging.INFO, raise_exception=True, stream_log=True):
+def exe_cmd(cmd, working_dir=None, obfuscate=None, stdin=None, env=None, log_level=logging.INFO, raise_exception=True, stream_log=False):
     """
     Helper function for easily executing a command.
         cmd: The command to execute
@@ -113,7 +113,8 @@ def exe_cmd(cmd, working_dir=None, obfuscate=None, stdin=None, env=None, log_lev
         env: Custom environment variables to be used in place of parent envrionment variables (Optional, default: parent process environment variables)
         log_level: The default logging level. Default: INFO. Setting to None will disable logging in this function
         raise_exception: Whether to raise an exception if the command return a non-zero return code (Default: True)
-        stream_log: When False ,Timestamps will only be occur at start of Command (Default: True)
+        stream_log: When False, output will be logged when the process ends.
+            When True, the process output will be logged as it arrives (causing more metadata to be printed) (Default: True)
     """
 
     obfus_cmd = cmd.replace(obfuscate, '***') if obfuscate else cmd
