@@ -79,10 +79,10 @@ class TestUtils(unittest.TestCase):
 
     def test_retry(self):
         pid = os.getpid()
-        self.assertEquals(pid, baseutils.retry(os.getpid))
-        self.assertEquals(pid, baseutils.retry(os.getpid, retry=5, interval=5))
+        self.assertEqual(pid, baseutils.retry(os.getpid))
+        self.assertEqual(pid, baseutils.retry(os.getpid, retry=5, interval=5))
         a = [1, 2]
-        self.assertEquals(len(a), baseutils.retry(len, a, interval=5))
+        self.assertEqual(len(a), baseutils.retry(len, a, interval=5))
         try:
             baseutils.retry(dict, 'value', retry=1, interval=1)
             self.fail('baseutils.retry passed a failed attempt to create a dictionary')
