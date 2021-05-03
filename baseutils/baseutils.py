@@ -346,8 +346,7 @@ def send_p2paas_slack(token, msg_title, msg_id='Unknown', msg_severity=None, clu
         # todo: add icon / colour?
         sev = msg_severity
         if (msg_severity == 1):
-            sev = '*High*'
-            # add @here?
+            sev = '*High* <!channel>'
         elif (msg_severity == 2):
             sev = 'Medium'
         elif (msg_severity == 3):
